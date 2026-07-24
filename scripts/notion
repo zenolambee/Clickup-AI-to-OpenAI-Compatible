@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# NotionChat launcher — add this scripts/ folder to your PATH.
+# Works from any directory. Example:
+#   notion serve
+#   notion setup
+#   notion init --cookie "..."
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+export NOTIONCHAT_HOME="${NOTIONCHAT_HOME:-$ROOT}"
+cd "$NOTIONCHAT_HOME"
+
+if [[ -x "$NOTIONCHAT_HOME/.venv/bin/python" ]]; then
+  exec "$NOTIONCHAT_HOME/.venv/bin/python" -m notionchat "$@"
+elif command -v python3 >/dev/null 2>&1; then
+  exec python3 -m notionchat "$@"
+elif command -v python >/dev/null 2>&1; then
+  exec python -m notionchat "$@"
+fi
+
+echo "Error: Python not found. Create a venv in the project and install deps:" >&2
+echo "  cd \"$NOTIONCHAT_HOME\"" >&2
+echo "  python -m venv .venv && source .venv/bin/activate" >&2
+echo "  pip install -r requirements.txt && pip install -e ." >&2
+exit 1

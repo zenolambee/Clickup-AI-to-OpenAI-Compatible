@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+.env
+.venv/
+venv/
+.tmp_pkg/
+data/
+threads/
+notion_account.json
+*.log
+*.zip
+*.egg-info/
+dist/
+build/
+logs/
+
+# Private capture files (cookies, internal Notion payloads)
+network.txt
+business.txt
+config.example.json
+notion_account.json.example
+_scrub_history.py
+.git.backup-rewrite/
