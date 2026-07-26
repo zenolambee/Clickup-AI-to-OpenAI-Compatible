@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "notionchat"
-version = "0.3.1"
-description = "OpenAI-compatible API proxy for Notion AI (cookie auth)"
+name = "qwenchat"
+version = "0.1.0"
+description = "OpenAI-compatible API proxy for Qwen (chat.qwen.ai) via token/cookie auth"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
@@ -18,8 +18,8 @@ dependencies = [
 ]
 
 [project.scripts]
-notion = "notionchat.__main__:main"
-notionchat = "notionchat.__main__:main"
+qwenchat = "qwenchat.__main__:main"
+qwen = "qwenchat.__main__:main"
 
 [tool.setuptools.packages.find]
-include = ["notionchat*"]
+include = ["qwenchat*"]

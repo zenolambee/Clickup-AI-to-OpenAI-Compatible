@@ -27,10 +27,10 @@ const python = fs.existsSync(venvPython) ? venvPython : systemPython;
 module.exports = {
   apps: [
     {
-      name: "notionchat",
+      name: "qwenchat",
       cwd: root,
       script: python,
-      args: "-m notionchat serve",
+      args: "-m qwenchat serve",
       interpreter: "none",
       instances: 1,
       exec_mode: "fork",
@@ -42,7 +42,7 @@ module.exports = {
       restart_delay: 3000,
       kill_timeout: 8000,
       env: {
-        NOTIONCHAT_HOME: root,
+        QWENCHAT_HOME: root,
         PYTHONUNBUFFERED: "1",
         PYTHONIOENCODING: "utf-8",
       },
