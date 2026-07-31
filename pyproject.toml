@@ -20,6 +20,8 @@ dependencies = [
 [project.scripts]
 qwenchat = "qwenchat.__main__:main"
 qwen = "qwenchat.__main__:main"
+kimichat = "kimichat.__main__:main"
+kimi = "kimichat.__main__:main"
 
 [tool.setuptools.packages.find]
-include = ["qwenchat*"]
+include = ["qwenchat*", "kimichat*"]

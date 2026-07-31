@@ -1,0 +1,8 @@
+{
+  "cookies": "sso=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzZXNzaW9uX2lkIjoiNDIxNjg2ZjQtZTgyYi00OTE1LWJhZmEtMTIxZjA5ODA3NjE5In0.S1AHNu6HHjrLhH93I8MTWzEXdmROkO4s5Hvhc2tJ5-I; sso-rw=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzZXNzaW9uX2lkIjoiNDIxNjg2ZjQtZTgyYi00OTE1LWJhZmEtMTIxZjA5ODA3NjE5In0.S1AHNu6HHjrLhH93I8MTWzEXdmROkO4s5Hvhc2tJ5-I; x-userid=dbbba426-a3e9-43b6-9b55-1da3e6501c54",
+  "bearer_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzZXNzaW9uX2lkIjoiNDIxNjg2ZjQtZTgyYi00OTE1LWJhZmEtMTIxZjA5ODA3NjE5In0.S1AHNu6HHjrLhH93I8MTWzEXdmROkO4s5Hvhc2tJ5-I",
+  "user_id": "",
+  "user_name": "",
+  "user_email": "",
+  "default_model": "grok-3"
+}
