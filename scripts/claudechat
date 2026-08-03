@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# ClaudeChat launcher — add this scripts/ folder to your PATH.
+# Works from any directory. Example:
+#   claudechat serve
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+export CLAUDE_HOME="${CLAUDE_HOME:-$ROOT}"
+cd "$CLAUDE_HOME"
+
+if [[ -x "$CLAUDE_HOME/.venv/bin/python" ]]; then
+  exec "$CLAUDE_HOME/.venv/bin/python" -m claudechat "$@"
+elif command -v python3 >/dev/null 2>&1; then
+  exec python3 -m claudechat "$@"
+elif command -v python >/dev/null 2>&1; then
+  exec python -m claudechat "$@"
+fi
+
+echo "Error: Python not found. Create a venv in the project and install deps:" >&2
+echo "  cd \"$CLAUDE_HOME\"" >&2
+echo "  python -m venv .venv && source .venv/bin/activate" >&2
+echo "  pip install -r requirements.txt && pip install -e ." >&2
+exit 1
