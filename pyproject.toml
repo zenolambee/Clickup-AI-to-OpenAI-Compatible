@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "qwenchat"
+name = "ai-proxy-chat"
 version = "0.1.0"
-description = "OpenAI-compatible API proxy for Qwen (chat.qwen.ai) via token/cookie auth"
+description = "OpenAI-compatible API proxies for multiple AI chat services (Notion, Qwen, Claude, Grok, Kimi, Gemini, Bolt.new)"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
@@ -18,10 +18,29 @@ dependencies = [
 ]
 
 [project.scripts]
+notionchat = "notionchat.__main__:main"
+notion = "notionchat.__main__:main"
 qwenchat = "qwenchat.__main__:main"
 qwen = "qwenchat.__main__:main"
+claudechat = "claudechat.__main__:main"
+claude = "claudechat.__main__:main"
+grokchat = "grokchat.__main__:main"
+grok = "grokchat.__main__:main"
 kimichat = "kimichat.__main__:main"
 kimi = "kimichat.__main__:main"
+gemini = "gemini.__main__:main"
+geminichat = "geminichat.__main__:main"
+boltchat = "boltchat.__main__:main"
+bolt = "boltchat.__main__:main"
 
 [tool.setuptools.packages.find]
-include = ["qwenchat*", "kimichat*"]
+include = [
+    "notionchat*",
+    "qwenchat*",
+    "claudechat*",
+    "grokchat*",
+    "kimichat*",
+    "gemini*",
+    "geminichat*",
+    "boltchat*",
+]
