@@ -32,6 +32,9 @@ gemini = "gemini.__main__:main"
 geminichat = "geminichat.__main__:main"
 boltchat = "boltchat.__main__:main"
 bolt = "boltchat.__main__:main"
+higgsfieldchat = "higgsfieldchat.__main__:main"
+higgsfield = "higgsfieldchat.__main__:main"
+hgc = "higgsfieldchat.__main__:main"
 
 [tool.setuptools.packages.find]
 include = [
@@ -43,4 +46,5 @@ include = [
     "gemini*",
     "geminichat*",
     "boltchat*",
+    "higgsfieldchat*",
 ]

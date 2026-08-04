@@ -34,7 +34,7 @@ async def fetch_claude_organization_id(
     try:
         resp = await session.get(url, headers=headers)
         if resp.status_code != 200:
-            body = await resp.atext()
+            body = resp.text
             raise ClaudeChatError(
                 f"Cookie validation failed ({resp.status_code}): {body[:200]}",
                 status_code=502,
