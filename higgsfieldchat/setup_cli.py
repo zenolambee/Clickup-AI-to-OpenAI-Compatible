@@ -181,7 +181,7 @@ async def run_interactive_setup(
 
     parsed = parse_browser_cookie(cookie_value)
     acc = HiggsfieldAccount(
-        __session=parsed.get("__session", ""),
+        session=parsed.get("__session", ""),
         full_cookie=cookie_value.strip().rstrip(";"),
     )
     save_higgsfield_account(acc, account_path)

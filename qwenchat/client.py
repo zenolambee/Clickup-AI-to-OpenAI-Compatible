@@ -234,6 +234,9 @@ class QwenChatClient:
                     pass
                 elif event_type == "done":
                     usage = event.get("usage") or {}
+                    content = event.get("content") or ""
+                    if content and not collected_text:
+                        collected_text = content
                     input_tokens = usage.get("input_tokens", 0) or usage.get("prompt_tokens", 0)
                     output_tokens = usage.get("output_tokens", 0) or usage.get("completion_tokens", 0)
 
@@ -357,6 +360,9 @@ class QwenChatClient:
                                 collected_text = content
                     elif event_type == "done":
                         usage = event.get("usage") or {}
+                        content = event.get("content") or ""
+                        if content and not collected_text:
+                            collected_text = content
                         input_tokens = usage.get("input_tokens", 0) or usage.get("prompt_tokens", 0)
                         output_tokens = usage.get("output_tokens", 0) or usage.get("completion_tokens", 0)
             except BaseException as e:

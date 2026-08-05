@@ -84,7 +84,7 @@ def load_settings() -> Settings:
 def _cookie_identity_changed(acc: HiggsfieldAccount, cookie: str) -> bool:
     parsed = parse_browser_cookie(cookie)
     new_session = parsed.get("__session", "")
-    if new_session and acc.__session and new_session != acc.__session:
+    if new_session and acc.session and new_session != acc.session:
         return True
     return False
 
@@ -96,7 +96,7 @@ def load_account_from_env(settings: Settings) -> HiggsfieldAccount:
         acc = load_higgsfield_account(settings.account_path)
         if cookie:
             if _cookie_identity_changed(acc, cookie):
-                acc = replace(acc, full_cookie=cookie.strip().rstrip(";"), __session=parse_browser_cookie(cookie).get("__session", acc.__session))
+                acc = replace(acc, full_cookie=cookie.strip().rstrip(";"), session=parse_browser_cookie(cookie).get("__session", acc.session))
                 save_higgsfield_account(acc, settings.account_path)
             else:
                 acc = replace(acc, full_cookie=cookie.strip().rstrip(";"))
@@ -105,7 +105,7 @@ def load_account_from_env(settings: Settings) -> HiggsfieldAccount:
     if cookie:
         parsed = parse_browser_cookie(cookie)
         acc = HiggsfieldAccount(
-            __session=parsed.get("__session", ""),
+            session=parsed.get("__session", ""),
             full_cookie=cookie.strip().rstrip(";"),
         )
         save_higgsfield_account(acc, settings.account_path)

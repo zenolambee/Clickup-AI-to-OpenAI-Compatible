@@ -10,7 +10,7 @@ from higgsfieldchat.exceptions import HiggsfieldChatError
 
 @dataclass(slots=True, frozen=True)
 class HiggsfieldAccount:
-    __session: str
+    session: str
     full_cookie: str = ""
     user_id: str = ""
     user_name: str = ""
@@ -39,7 +39,7 @@ def load_higgsfield_account(path: Path | str) -> HiggsfieldAccount:
     except json.JSONDecodeError as e:
         raise HiggsfieldChatError(f"Invalid account JSON: {e}", status_code=500) from e
 
-    for field_name in ("__session",):
+    for field_name in ("session",):
         if not data.get(field_name):
             raise HiggsfieldChatError(
                 f"Account file missing required field: {field_name}",
@@ -68,6 +68,6 @@ def build_cookie_header(acc: HiggsfieldAccount) -> str:
     if acc.full_cookie:
         return acc.full_cookie.strip().rstrip(";")
     parts = [
-        f"__session={acc.__session}",
+        f"__session={acc.session}",
     ]
     return "; ".join(parts)

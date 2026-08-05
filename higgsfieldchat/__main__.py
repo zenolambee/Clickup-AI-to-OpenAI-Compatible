@@ -56,7 +56,7 @@ def cmd_init(args: argparse.Namespace) -> int:
         return 1
 
     acc = HiggsfieldAccount(
-        __session=__session,
+        session=__session,
         full_cookie=cookie.strip().rstrip(";"),
     )
     save_higgsfield_account(acc, args.account)
