@@ -35,6 +35,12 @@ bolt = "boltchat.__main__:main"
 higgsfieldchat = "higgsfieldchat.__main__:main"
 higgsfield = "higgsfieldchat.__main__:main"
 hgc = "higgsfieldchat.__main__:main"
+arenachat = "arenachat.__main__:main"
+arena = "arenachat.__main__:main"
+pokeechat = "pokeechat.__main__:main"
+pokee = "pokeechat.__main__:main"
+deepseekchat = "deepseekchat.__main__:main"
+deepseek = "deepseekchat.__main__:main"
 
 [tool.setuptools.packages.find]
 include = [
@@ -47,4 +53,7 @@ include = [
     "geminichat*",
     "boltchat*",
     "higgsfieldchat*",
+    "arenachat*",
+    "pokeechat*",
+    "deepseekchat*",
 ]
