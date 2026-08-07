@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# DeepSeekWeb launcher (chat.deepseek.com cookie) — add this scripts/ folder to your PATH.
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+export DEEPSEEKWEB_HOME="${DEEPSEEKWEB_HOME:-$ROOT}"
+cd "$DEEPSEEKWEB_HOME"
+
+if [[ -x "$DEEPSEEKWEB_HOME/.venv/bin/python" ]]; then
+  exec "$DEEPSEEKWEB_HOME/.venv/bin/python" -m deepseekweb "$@"
+elif command -v python3 >/dev/null 2>&1; then
+  exec python3 -m deepseekweb "$@"
+elif command -v python >/dev/null 2>&1; then
+  exec python -m deepseekweb "$@"
+fi
+echo "Error: Python not found. Create a venv and install deps." >&2
+exit 1

@@ -43,22 +43,27 @@ class ArenaChatClient:
         }
 
     async def fetch_available_models(self) -> list[dict[str, Any]]:
-        """Fetch available models from Arena AI."""
         url = f"{self.base_url}/api/models"
         headers = self._headers()
+        data = await self._request("GET", url, headers=headers, stream=False)
+        if isinstance(data, list):
+            return data
+        if isinstance(data, dict):
+            return data.get("models") or data.get("data") or []
+        return []
+
+    async def _request(self, method: str, url: str, **kwargs: Any) -> Any:
         async with AsyncSession(timeout=DEFAULT_TIMEOUT) as session:
-            resp = await session.get(url, headers=headers)
+            resp = await session.request(method, url, **kwargs)
             if resp.status_code != 200:
+                body = await resp.atext()
                 raise ArenaChatError(
-                    f"Failed to fetch models ({resp.status_code})",
+                    f"Arena AI API error ({resp.status_code}): {body[:300]}",
                     status_code=502,
                 )
-            data = resp.json()
-            if isinstance(data, list):
-                return data
-            if isinstance(data, dict):
-                return data.get("models") or data.get("data") or []
-            return []
+            if kwargs.get("stream"):
+                return resp
+            return resp.json()
 
     async def complete(
         self,
@@ -68,7 +73,6 @@ class ArenaChatClient:
         model: str | None = None,
         stream: bool = False,
     ) -> ChatResult:
-        """Send a chat completion request to Arena AI."""
         messages: list[dict[str, str]] = []
         if system:
             messages.append({"role": "system", "content": system})
@@ -83,44 +87,36 @@ class ArenaChatClient:
             "stream": stream,
         }
 
-        async with AsyncSession(timeout=DEFAULT_TIMEOUT) as session:
-            resp = await session.post(url, json=payload, headers=headers)
-            if resp.status_code != 200:
-                body = await resp.atext()
-                raise ArenaChatError(
-                    f"Arena AI API error ({resp.status_code}): {body[:300]}",
-                    status_code=502,
-                )
-
-            if stream:
-                collected: list[str] = []
-                async for line in resp.aiter_lines():
-                    decoded = line.decode("utf-8", errors="replace") if isinstance(line, bytes) else line
-                    if decoded.startswith("data: "):
-                        data_str = decoded[6:].strip()
-                        if data_str == "[DONE]":
-                            break
-                        try:
-                            data = json.loads(data_str)
-                            delta = (
-                                data.get("choices", [{}])[0]
-                                .get("delta", {})
-                                .get("content", "")
-                            )
-                            if delta:
-                                collected.append(delta)
-                        except json.JSONDecodeError:
-                            pass
-                text = "".join(collected) if collected else None
-            else:
-                data = resp.json()
-                text = (
-                    data.get("choices", [{}])[0]
-                    .get("message", {})
-                    .get("content")
-                )
-
-            return ChatResult(
-                text=text or None,
-                model=model or self.account.default_model,
+        if stream:
+            resp = await self._request("POST", url, json=payload, headers=headers, stream=True)
+            collected: list[str] = []
+            async for line in resp.aiter_lines():
+                decoded = line.decode("utf-8", errors="replace") if isinstance(line, bytes) else line
+                if decoded.startswith("data: "):
+                    data_str = decoded[6:].strip()
+                    if data_str == "[DONE]":
+                        break
+                    try:
+                        data = json.loads(data_str)
+                        delta = (
+                            data.get("choices", [{}])[0]
+                            .get("delta", {})
+                            .get("content", "")
+                        )
+                        if delta:
+                            collected.append(delta)
+                    except json.JSONDecodeError:
+                        pass
+            text = "".join(collected) if collected else None
+        else:
+            data = await self._request("POST", url, json=payload, headers=headers, stream=False)
+            text = (
+                data.get("choices", [{}])[0]
+                .get("message", {})
+                .get("content")
             )
+
+        return ChatResult(
+            text=text or None,
+            model=model or self.account.default_model,
+        )

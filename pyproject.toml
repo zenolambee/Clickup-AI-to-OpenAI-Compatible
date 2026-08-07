@@ -41,6 +41,7 @@ pokeechat = "pokeechat.__main__:main"
 pokee = "pokeechat.__main__:main"
 deepseekchat = "deepseekchat.__main__:main"
 deepseek = "deepseekchat.__main__:main"
+deepseekweb = "deepseekweb.__main__:main"
 
 [tool.setuptools.packages.find]
 include = [
@@ -56,4 +57,5 @@ include = [
     "arenachat*",
     "pokeechat*",
     "deepseekchat*",
+    "deepseekweb*",
 ]
