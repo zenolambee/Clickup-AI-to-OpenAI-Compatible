@@ -26,6 +26,7 @@ def _resolve_home() -> Path | None:
 def _load_dotenv_files() -> None:
     home = _resolve_home()
     if home is not None:
+        load_dotenv(home / "deepseekweb.env", override=False)
         load_dotenv(home / ".env", override=False)
     load_dotenv(override=False)
 

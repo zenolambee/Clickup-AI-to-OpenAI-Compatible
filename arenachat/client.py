@@ -54,16 +54,14 @@ class ArenaChatClient:
 
     async def _request(self, method: str, url: str, **kwargs: Any) -> Any:
         async with AsyncSession(timeout=DEFAULT_TIMEOUT) as session:
-            resp = await session.request(method, url, **kwargs)
+            resp = await session.request(method, url, stream=True, **kwargs)
+            body = await resp.atext()
             if resp.status_code != 200:
-                body = await resp.atext()
                 raise ArenaChatError(
                     f"Arena AI API error ({resp.status_code}): {body[:300]}",
                     status_code=502,
                 )
-            if kwargs.get("stream"):
-                return resp
-            return resp.json()
+            return json.loads(body)
 
     async def complete(
         self,
@@ -88,26 +86,33 @@ class ArenaChatClient:
         }
 
         if stream:
-            resp = await self._request("POST", url, json=payload, headers=headers, stream=True)
-            collected: list[str] = []
-            async for line in resp.aiter_lines():
-                decoded = line.decode("utf-8", errors="replace") if isinstance(line, bytes) else line
-                if decoded.startswith("data: "):
-                    data_str = decoded[6:].strip()
-                    if data_str == "[DONE]":
-                        break
-                    try:
-                        data = json.loads(data_str)
-                        delta = (
-                            data.get("choices", [{}])[0]
-                            .get("delta", {})
-                            .get("content", "")
-                        )
-                        if delta:
-                            collected.append(delta)
-                    except json.JSONDecodeError:
-                        pass
-            text = "".join(collected) if collected else None
+            async with AsyncSession(timeout=DEFAULT_TIMEOUT) as session:
+                resp = await session.request("POST", url, json=payload, headers=headers, stream=True)
+                if resp.status_code != 200:
+                    body = await resp.atext()
+                    raise ArenaChatError(
+                        f"Arena AI API error ({resp.status_code}): {body[:300]}",
+                        status_code=502,
+                    )
+                collected: list[str] = []
+                async for line in resp.aiter_lines():
+                    decoded = line.decode("utf-8", errors="replace") if isinstance(line, bytes) else line
+                    if decoded.startswith("data: "):
+                        data_str = decoded[6:].strip()
+                        if data_str == "[DONE]":
+                            break
+                        try:
+                            data = json.loads(data_str)
+                            delta = (
+                                data.get("choices", [{}])[0]
+                                .get("delta", {})
+                                .get("content", "")
+                            )
+                            if delta:
+                                collected.append(delta)
+                        except json.JSONDecodeError:
+                            pass
+                text = "".join(collected) if collected else None
         else:
             data = await self._request("POST", url, json=payload, headers=headers, stream=False)
             text = (

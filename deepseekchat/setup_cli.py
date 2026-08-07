@@ -86,7 +86,7 @@ def run_interactive_setup(
     force: bool = False,
     yes: bool = False,
 ) -> int:
-    env_path = env_path or Path(".env")
+    env_path = env_path or Path("deepseek.env")
 
     _print("=== DeepSeekChat interactive setup ===")
     if env_path.exists() and not force and not yes:

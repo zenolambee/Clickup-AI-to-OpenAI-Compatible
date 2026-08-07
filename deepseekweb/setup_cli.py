@@ -95,7 +95,7 @@ def run_interactive_setup(
     force: bool = False,
     yes: bool = False,
 ) -> int:
-    env_path = env_path or Path(".env")
+    env_path = env_path or Path("deepseekweb.env")
     account_path = account_path or Path("deepseek_account.json")
 
     _print("=== DeepSeekWeb (cookie) interactive setup ===")

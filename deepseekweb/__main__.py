@@ -72,15 +72,15 @@ def main(argv: list[str] | None = None) -> None:
     init_p.add_argument("--account", default="deepseek_account.json", help="Output account file path")
     init_p.set_defaults(func=cmd_init)
 
-    setup_p = sub.add_parser("setup", help="Interactive wizard: token -> account file -> .env")
-    setup_p.add_argument("--env", default=".env", help="Path to write environment file (default: .env)")
+    setup_p = sub.add_parser("setup", help="Interactive wizard: token -> account file -> deepseekweb.env")
+    setup_p.add_argument("--env", default="deepseekweb.env", help="Path to write env file (default: deepseekweb.env)")
     setup_p.add_argument("--account", default="deepseek_account.json", help="Output account file path")
     setup_p.add_argument("--token", default=None, help="Skip prompt and use this userToken")
     setup_p.add_argument("--ds-session-id", default=None, help="Optional ds_session_id cookie value")
     setup_p.add_argument("--api-key", default=None, help="Local API key for DEEPSEEKWEB_API_KEY")
     setup_p.add_argument("--host", default=None, help="Bind host for DEEPSEEKWEB_HOST")
     setup_p.add_argument("--port", default=None, help="Port for DEEPSEEKWEB_PORT")
-    setup_p.add_argument("--force", action="store_true", help="Overwrite .env without asking")
+    setup_p.add_argument("--force", action="store_true", help="Overwrite deepseekweb.env without asking")
     setup_p.add_argument("-y", "--yes", action="store_true", help="Accept defaults with minimal prompts")
     setup_p.set_defaults(func=cmd_setup)
 
