@@ -51,13 +51,13 @@ def main(argv: list[str] | None = None) -> None:
     serve_p = sub.add_parser("serve", help="Start OpenAI-compatible API server")
     serve_p.set_defaults(func=cmd_serve)
 
-    setup_p = sub.add_parser("setup", help="Interactive wizard: API key -> .env")
-    setup_p.add_argument("--env", default=".env", help="Path to write environment file (default: .env)")
+    setup_p = sub.add_parser("setup", help="Interactive wizard: API key -> pokee.env")
+    setup_p.add_argument("--env", default="pokee.env", help="Path to write environment file (default: pokee.env)")
     setup_p.add_argument("--api-key", default=None, help="Local API key for POKEECHAT_API_KEY")
     setup_p.add_argument("--pokee-api-key", default=None, help="Your Pokee key (POKEE_API_KEY, starts with pk-)")
     setup_p.add_argument("--host", default=None, help="Bind host for POKEECHAT_HOST")
     setup_p.add_argument("--port", default=None, help="Port for POKEECHAT_PORT")
-    setup_p.add_argument("--force", action="store_true", help="Overwrite .env without asking")
+    setup_p.add_argument("--force", action="store_true", help="Overwrite pokee.env without asking")
     setup_p.add_argument("-y", "--yes", action="store_true", help="Accept defaults with minimal prompts")
     setup_p.set_defaults(func=cmd_setup)
 

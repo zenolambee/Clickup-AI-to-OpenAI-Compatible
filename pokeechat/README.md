@@ -15,7 +15,7 @@ python -m pokeechat setup
 python -m pokeechat serve
 ```
 
-Or configure manually in `.env`:
+Or configure manually in `pokee.env`:
 
 ```
 POKEECHAT_API_KEY=sk-pokeechat          # local key that gates this proxy

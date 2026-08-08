@@ -21,7 +21,9 @@ def _resolve_home() -> Path | None:
 def _load_dotenv_files() -> None:
     home = _resolve_home()
     if home is not None:
+        load_dotenv(home / "pokee.env", override=False)
         load_dotenv(home / ".env", override=False)
+    load_dotenv("pokee.env", override=False)
     load_dotenv(override=False)
 
 
@@ -53,7 +55,7 @@ def load_settings() -> Settings:
 def require_pokee_key(settings: Settings) -> str:
     if not settings.pokee_api_key:
         raise PokeeChatError(
-            "Missing POKEE_API_KEY. Get it from https://console.pokee.ai/keys and set it in .env",
+            "Missing POKEE_API_KEY. Get it from https://console.pokee.ai/keys and set it in pokee.env",
             status_code=500,
         )
     return settings.pokee_api_key

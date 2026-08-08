@@ -23,6 +23,7 @@ def _load_dotenv_files() -> None:
     if home is not None:
         load_dotenv(home / "deepseek.env", override=False)
         load_dotenv(home / ".env", override=False)
+    load_dotenv("deepseek.env", override=False)
     load_dotenv(override=False)
 
 
