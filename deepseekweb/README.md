@@ -1,5 +1,17 @@
 # DeepSeekWeb — chat.deepseek.com → OpenAI Compatible
 
+> Panduan instalasi lengkap & profesional: **[INSTALL.md](INSTALL.md)**
+
+## Multi-cookie (round-robin)
+
+Beberapa akun didukung: pisahkan `userToken` (dan `ds_session_id`) dengan koma
+di `deepseekweb.env`. Setiap request memakai akun berikutnya secara bergilir:
+
+```
+DEEPSEEKWEB_TOKEN=tok1,tok2,tok3
+DEEPSEEK_WEB_DS_SESSION_ID=sid1,sid2
+```
+
 **OpenAI-compatible API proxy for [DeepSeek](https://chat.deepseek.com) web chat (cookie auth).**
 Uses your free DeepSeek browser session (`userToken`) — **no API balance, no billing**.
 

@@ -23,8 +23,9 @@ def _load_dotenv_files() -> None:
     if home is not None:
         load_dotenv(home / "deepseek.env", override=False)
         load_dotenv(home / ".env", override=False)
-    load_dotenv("deepseek.env", override=False)
-    load_dotenv(override=False)
+    else:
+        load_dotenv(Path("deepseek.env"), override=False)
+    load_dotenv(Path(".env"), override=False)
 
 
 _load_dotenv_files()
@@ -37,7 +38,11 @@ class Settings:
     port: int
     base_url: str
     default_model: str
-    deepseek_api_key: str
+    deepseek_api_keys: list[str]
+
+
+def _parse_list(value: str) -> list[str]:
+    return [part.strip() for part in (value or "").split(",") if part.strip()]
 
 
 def load_settings() -> Settings:
@@ -48,14 +53,23 @@ def load_settings() -> Settings:
         port=int(os.getenv("DEEPSEEKCHAT_PORT", "1996")),
         base_url=os.getenv("DEEPSEEKCHAT_BASE_URL", DEFAULT_BASE_URL).rstrip("/"),
         default_model=os.getenv("DEEPSEEKCHAT_DEFAULT_MODEL", "deepseek-v4-flash"),
-        deepseek_api_key=os.getenv("DEEPSEEK_API_KEY", "").strip(),
+        deepseek_api_keys=_parse_list(os.getenv("DEEPSEEK_API_KEY", "")),
     )
 
 
 def require_deepseek_key(settings: Settings) -> str:
-    if not settings.deepseek_api_key:
+    if not settings.deepseek_api_keys:
         raise DeepSeekChatError(
             "Missing DEEPSEEK_API_KEY. Get it from https://platform.deepseek.com and set it in .env",
             status_code=500,
         )
-    return settings.deepseek_api_key
+    return settings.deepseek_api_keys[0]
+
+
+def require_deepseek_key_list(settings: Settings) -> list[str]:
+    if not settings.deepseek_api_keys:
+        raise DeepSeekChatError(
+            "Missing DEEPSEEK_API_KEY. Get it from https://platform.deepseek.com and set it in .env",
+            status_code=500,
+        )
+    return settings.deepseek_api_keys

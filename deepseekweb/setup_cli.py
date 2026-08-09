@@ -68,11 +68,13 @@ def _render_env(values: dict[str, str]) -> str:
         f"DEEPSEEKWEB_ACCOUNT={values.get('DEEPSEEKWEB_ACCOUNT', 'deepseek_account.json')}",
         f"DEEPSEEKWEB_BASE_URL={values.get('DEEPSEEKWEB_BASE_URL', 'https://chat.deepseek.com/api/v0')}",
         f"DEEPSEEKWEB_DEFAULT_MODEL={values.get('DEEPSEEKWEB_DEFAULT_MODEL', 'deepseek-v4-flash')}",
+        "",
+        "# userToken: DevTools (F12) → Application → Local Storage → https://chat.deepseek.com → \"userToken\"",
         f"DEEPSEEKWEB_TOKEN={values['DEEPSEEKWEB_TOKEN']}",
+        "",
+        "# ds_session_id (opsional): DevTools → Application → Cookies → \"ds_session_id\"",
+        f"DEEPSEEK_WEB_DS_SESSION_ID={values.get('DEEPSEEK_WEB_DS_SESSION_ID', '').strip()}",
     ]
-    ds = values.get("DEEPSEEK_WEB_DS_SESSION_ID", "").strip()
-    if ds:
-        lines.append(f"DEEPSEEK_WEB_DS_SESSION_ID={ds}")
     lines.append("")
     return "\n".join(lines)
 
@@ -107,10 +109,11 @@ def run_interactive_setup(
 
     local_pk = api_key or ("sk-deepseekweb" if yes else _prompt("Local API key", default="sk-deepseekweb"))
     token_val = _read_token(preset=token)
+    session_id = ds_session_id if ds_session_id is not None else _prompt("ds_session_id (optional, press Enter to skip)", default="")
 
     acc = DeepSeekWebAccount(
         user_token=token_val,
-        ds_session_id=(ds_session_id or "").strip(),
+        ds_session_id=session_id.strip(),
     )
     save_deepseek_account(acc, account_path)
     _print(f"Saved account to {account_path}")
@@ -124,8 +127,8 @@ def run_interactive_setup(
         "DEEPSEEKWEB_DEFAULT_MODEL": "deepseek-v4-flash",
         "DEEPSEEKWEB_TOKEN": token_val,
     }
-    if ds_session_id:
-        updates["DEEPSEEK_WEB_DS_SESSION_ID"] = ds_session_id
+    if session_id.strip():
+        updates["DEEPSEEK_WEB_DS_SESSION_ID"] = session_id.strip()
     _write_env(env_path, updates, overwrite=force or not env_path.exists())
     _print(f"Wrote configuration to {env_path}")
     _print("Start the server with:  python -m deepseekweb serve")

@@ -14,6 +14,15 @@ Works with Cursor, 9router, Postman, or any OpenAI Chat Completions client.
 
 Aliases (`deepseek-chat` → flash, `deepseek-reasoner`/`gpt-4o`/`claude-sonnet` → pro) keep generic OpenAI clients working.
 
+## Multi-key (round-robin)
+
+Beberapa API key didukung: pisahkan dengan koma di `deepseek.env`.
+Setiap request memakai key berikutnya secara bergilir:
+
+```
+DEEPSEEK_API_KEY=sk-a1b2c3,sk-d4e5f6,sk-g7h8i9
+```
+
 ## Setup
 
 ```bash

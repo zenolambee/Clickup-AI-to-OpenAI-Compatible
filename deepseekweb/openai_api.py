@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import threading
 import time
 import uuid
 from collections.abc import AsyncIterator
@@ -13,7 +14,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, ConfigDict
 
 from deepseekweb.client import DeepSeekWebClient
-from deepseekweb.config import Settings, load_account_from_env, load_settings
+from deepseekweb.config import Settings, load_accounts_from_env, load_settings
 from deepseekweb.exceptions import DeepSeekWebError
 from deepseekweb.models import (
     cache_openai_models,
@@ -95,6 +96,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or load_settings()
     app = FastAPI(title="DeepSeekWeb", version="0.1.0")
     app.state.settings = settings
+    app.state.accounts_index = 0
+    app.state.accounts_lock = threading.Lock()
 
     def verify_key(authorization: str | None = Header(default=None)) -> None:
         if not settings.api_key:
@@ -125,9 +128,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     ) -> Any:
         model = resolve_model(req.model)
         try:
-            account = load_account_from_env(settings)
+            accounts = load_accounts_from_env(settings)
+            if not accounts:
+                raise DeepSeekWebError("No DeepSeek web account configured.", status_code=500)
+            with app.state.accounts_lock:
+                account = accounts[app.state.accounts_index % len(accounts)]
+                app.state.accounts_index += 1
             client = DeepSeekWebClient(account, base_url=settings.base_url)
-            log.info("chat stream=%s model=%s resolved=%s msgs=%d", req.stream, req.model, model, len(req.messages))
+            log.info("chat stream=%s model=%s resolved=%s msgs=%d account=%s", req.stream, req.model, model, len(req.messages), account.user_token[:10])
             if req.stream:
                 return StreamingResponse(
                     _stream_openai(client, req, model),

@@ -28,8 +28,9 @@ def _load_dotenv_files() -> None:
     if home is not None:
         load_dotenv(home / "deepseekweb.env", override=False)
         load_dotenv(home / ".env", override=False)
-    load_dotenv("deepseekweb.env", override=False)
-    load_dotenv(override=False)
+    else:
+        load_dotenv(Path("deepseekweb.env"), override=False)
+    load_dotenv(Path(".env"), override=False)
 
 
 _load_dotenv_files()
@@ -66,34 +67,79 @@ def load_settings() -> Settings:
     )
 
 
-def load_account_from_env(settings: Settings) -> DeepSeekWebAccount:
-    token = os.getenv("DEEPSEEKWEB_TOKEN", "").strip()
-    ds_session = os.getenv("DEEPSEEK_WEB_DS_SESSION_ID", "").strip()
+def _parse_list(value: str) -> list[str]:
+    return [part.strip() for part in (value or "").split(",") if part.strip()]
+
+
+def _parse_indexed_accounts() -> list[DeepSeekWebAccount]:
+    accounts: list[DeepSeekWebAccount] = []
+    i = 1
+    while True:
+        token = os.getenv(f"DEEPSEEKWEB_TOKEN_{i}", "").strip()
+        if not token:
+            break
+        sid = os.getenv(f"DEEPSEEK_WEB_DS_SESSION_ID_{i}", "").strip()
+        accounts.append(DeepSeekWebAccount(user_token=token, ds_session_id=sid))
+        i += 1
+    return accounts
+
+
+def _merge_account(a: DeepSeekWebAccount, b: DeepSeekWebAccount) -> DeepSeekWebAccount:
+    return DeepSeekWebAccount(
+        user_token=a.user_token,
+        ds_session_id=a.ds_session_id or b.ds_session_id,
+        user_id=a.user_id or b.user_id,
+        user_name=a.user_name or b.user_name,
+        default_model=a.default_model or b.default_model,
+        extras=b.extras,
+    )
+
+
+def load_accounts_from_env(settings: Settings) -> list[DeepSeekWebAccount]:
+    indexed = _parse_indexed_accounts()
+    if indexed:
+        if len(indexed) == 1 and settings.account_path.exists():
+            indexed[0] = _merge_account(indexed[0], load_deepseek_account(settings.account_path))
+        for acc in indexed:
+            save_deepseek_account(acc, settings.account_path)
+        return indexed
+
+    tokens = _parse_list(os.getenv("DEEPSEEKWEB_TOKEN", ""))
+    sessions = _parse_list(os.getenv("DEEPSEEK_WEB_DS_SESSION_ID", ""))
+
+    accounts: list[DeepSeekWebAccount] = []
+    if tokens:
+        for i, token in enumerate(tokens):
+            sid = sessions[i] if i < len(sessions) else ""
+            accounts.append(DeepSeekWebAccount(user_token=token, ds_session_id=sid))
+        if len(accounts) == 1 and settings.account_path.exists():
+            saved = load_deepseek_account(settings.account_path)
+            accounts[0] = _merge_account(accounts[0], saved)
+        for acc in accounts:
+            save_deepseek_account(acc, settings.account_path)
+        return accounts
 
     if settings.account_path.exists():
         acc = load_deepseek_account(settings.account_path)
-        if token:
+        if sessions:
             acc = DeepSeekWebAccount(
-                user_token=token.strip(),
-                ds_session_id=ds_session or acc.ds_session_id,
+                user_token=acc.user_token,
+                ds_session_id=",".join(sessions),
                 user_id=acc.user_id,
                 user_name=acc.user_name,
                 default_model=acc.default_model,
                 extras=acc.extras,
             )
             save_deepseek_account(acc, settings.account_path)
-        return acc
-
-    if token:
-        acc = DeepSeekWebAccount(
-            user_token=token.strip(),
-            ds_session_id=ds_session,
-        )
-        save_deepseek_account(acc, settings.account_path)
-        return acc
+        return [acc]
 
     raise DeepSeekWebError(
-        "No DeepSeek web credentials found. Set DEEPSEEKWEB_TOKEN in .env or run:\n"
+        "No DeepSeek web credentials found. Set DEEPSEEKWEB_TOKEN in deepseekweb.env "
+        "(comma-separated for multiple cookies) or run:\n"
         "  python -m deepseekweb init --token \"<userToken>\"",
         status_code=500,
     )
+
+
+def load_account_from_env(settings: Settings) -> DeepSeekWebAccount:
+    return load_accounts_from_env(settings)[0]

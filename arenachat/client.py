@@ -54,7 +54,7 @@ class ArenaChatClient:
 
     async def _request(self, method: str, url: str, **kwargs: Any) -> Any:
         async with AsyncSession(timeout=DEFAULT_TIMEOUT) as session:
-            resp = await session.request(method, url, stream=True, **kwargs)
+            resp = await session.request(method, url, stream=False, **kwargs)
             body = await resp.atext()
             if resp.status_code != 200:
                 raise ArenaChatError(

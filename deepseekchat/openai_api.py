@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import threading
 from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException
@@ -8,7 +9,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, ConfigDict
 
 from deepseekchat.client import DeepSeekChatClient
-from deepseekchat.config import Settings, load_settings, require_deepseek_key
+from deepseekchat.config import Settings, load_settings, require_deepseek_key_list
 from deepseekchat.exceptions import DeepSeekChatError
 from deepseekchat.models import (
     cache_openai_models,
@@ -46,6 +47,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or load_settings()
     app = FastAPI(title="DeepSeekChat", version="0.1.0")
     app.state.settings = settings
+    app.state.keys_index = 0
+    app.state.keys_lock = threading.Lock()
 
     def verify_key(authorization: str | None = Header(default=None)) -> None:
         if not settings.api_key:
@@ -57,7 +60,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(status_code=401, detail="Invalid API key")
 
     def get_client() -> DeepSeekChatClient:
-        api_key = require_deepseek_key(settings)
+        keys = require_deepseek_key_list(settings)
+        with app.state.keys_lock:
+            api_key = keys[app.state.keys_index % len(keys)]
+            app.state.keys_index += 1
+            log.info("using deepseek key %s", api_key[:8] + "...")
         return DeepSeekChatClient(api_key=api_key, base_url=settings.base_url)
 
     @app.get("/healthz")

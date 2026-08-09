@@ -60,9 +60,8 @@ def build_headers(acc: DeepSeekWebAccount, *, x_client_version: str | None = Non
         "x-client-timezone-offset": "10800",
         "x-app-version": "20241129.1",
         "x-client-platform": "web",
+        "x-client-version": x_client_version or "2.0.0",
     }
-    if x_client_version:
-        headers["x-client-version"] = x_client_version
     if acc.ds_session_id:
         headers["Cookie"] = f"ds_session_id={acc.ds_session_id}"
     return headers
