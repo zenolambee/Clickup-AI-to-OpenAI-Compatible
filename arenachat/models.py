@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import re
 import time
 from typing import Any
 
@@ -74,6 +75,31 @@ def list_openai_models_from_arena(response: dict[str, Any]) -> list[dict[str, An
         seen.add(mid)
         models.append(_openai_model_entry(name, owned_by="arena"))
 
+    models.sort(key=lambda item: item["id"].lower())
+    return models
+
+
+
+
+def parse_models_from_direct_html(html: str) -> list[dict[str, Any]]:
+    """Extract OpenAI-style model entries from arena.ai/direct SSR HTML.
+
+    The arena frontend ships the available model catalog inside Next.js
+    flight data (publicName/name/displayName triples).
+    """
+    models: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    triples = re.findall(
+        r'publicName\\":\\"([^\\"]+)\\",\\"name\\":\\"([^\\"]+)\\",'
+        r'\\"displayName\\":\\"([^\\"]+)\\"',
+        html,
+    )
+    for _pub, mid, _disp in triples:
+        if _pub in seen or not _pub:
+            continue
+        seen.add(_pub)
+        mid = _pub  # use publicName as id (matches how arena exposes it)
+        models.append(_openai_model_entry(mid, owned_by="arena"))
     models.sort(key=lambda item: item["id"].lower())
     return models
 

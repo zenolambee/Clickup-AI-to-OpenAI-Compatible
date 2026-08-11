@@ -11,6 +11,8 @@ from curl_cffi.requests import AsyncSession
 
 from arenachat.account import ArenaAccount
 from arenachat.exceptions import ArenaChatError
+from arenachat.models import parse_models_from_direct_html
+from arenachat import browser_chat
 
 log = logging.getLogger(__name__)
 
@@ -43,18 +45,39 @@ class ArenaChatClient:
         }
 
     async def fetch_available_models(self) -> list[dict[str, Any]]:
+        """Fetch models from Arena.
+
+        Prefers the JSON API endpoint; if the route is blocked (403) or
+        missing, falls back to parsing the SSR catalog on /direct.
+        """
         url = f"{self.base_url}/api/models"
         headers = self._headers()
-        data = await self._request("GET", url, headers=headers, stream=False)
-        if isinstance(data, list):
-            return data
-        if isinstance(data, dict):
-            return data.get("models") or data.get("data") or []
+        try:
+            data = await self._request("GET", url, headers=headers)
+            if isinstance(data, list):
+                return data
+            if isinstance(data, dict):
+                return data.get("models") or data.get("data") or []
+        except ArenaChatError:
+            log.info("api/models unavailable, falling back to /direct SSR")
+
+        page_url = f"{self.base_url}/direct"
+        async with AsyncSession(timeout=DEFAULT_TIMEOUT) as session:
+            resp = await session.request("GET", page_url, headers=headers, stream=True)
+            body = await resp.atext()
+            if resp.status_code != 200:
+                raise ArenaChatError(
+                    f"Arena AI page error ({resp.status_code}): {body[:300]}",
+                    status_code=502,
+                )
+        models = parse_models_from_direct_html(body)
+        if models:
+            return models
         return []
 
     async def _request(self, method: str, url: str, **kwargs: Any) -> Any:
         async with AsyncSession(timeout=DEFAULT_TIMEOUT) as session:
-            resp = await session.request(method, url, stream=False, **kwargs)
+            resp = await session.request(method, url, stream=True, **kwargs)
             body = await resp.atext()
             if resp.status_code != 200:
                 raise ArenaChatError(
@@ -114,12 +137,21 @@ class ArenaChatClient:
                             pass
                 text = "".join(collected) if collected else None
         else:
-            data = await self._request("POST", url, json=payload, headers=headers, stream=False)
-            text = (
-                data.get("choices", [{}])[0]
-                .get("message", {})
-                .get("content")
-            )
+            try:
+                data = await self._request("POST", url, json=payload, headers=headers)
+                text = (
+                    data.get("choices", [{}])[0]
+                    .get("message", {})
+                    .get("content")
+                )
+            except ArenaChatError:
+                browser_chat.set_cookie(self.account.cookie)
+                try:
+                    text = await browser_chat.browser_ask(prompt, model=model)
+                except Exception as bexc:
+                    raise ArenaChatError(
+                        f"arena browser chat failed: {bexc}", status_code=502
+                    ) from bexc
 
         return ChatResult(
             text=text or None,
