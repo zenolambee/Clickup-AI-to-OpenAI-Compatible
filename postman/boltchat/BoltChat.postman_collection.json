@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "NotionChat",
-    "description": "OpenAI-compatible API for Notion AI.\n\n1. Import `NotionChat.local.postman_environment.json`\n2. Select the environment\n3. Run `python -m notionchat serve`\n4. Send requests",
+    "name": "BoltChat",
+    "description": "OpenAI-compatible API for Bolt.new AI.\n\n1. Import `BoltChat.local.postman_environment.json`\n2. Select the environment\n3. Run `bolt serve`\n4. Send requests",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -121,19 +121,19 @@
   "variable": [
     {
       "key": "base_url",
-      "value": "http://127.0.0.1:1994"
+      "value": "http://127.0.0.1:1996"
     },
     {
       "key": "api_key",
-      "value": "sk-notionchat"
+      "value": "sk-boltchat"
     },
     {
       "key": "model",
-      "value": "notion-ai"
+      "value": "bolt-agent"
     },
     {
       "key": "session_id",
-      "value": "postman-session-1"
+      "value": "boltchat-session-1"
     }
   ]
 }
